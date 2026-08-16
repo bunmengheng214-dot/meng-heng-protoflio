@@ -3,12 +3,12 @@ html{scroll-behavior:smooth;font-size:16px;}
 body, html { -webkit-tap-highlight-color: transparent; }
 
 :root{
-  --bg-deep:#0b0e14;
-  --mesh-1:#5B8CFF;
-  --mesh-2:#B15BFF;
-  --mesh-3:#FF5B9E;
-  --mesh-5:#5BE3FF;
-  --mesh-6:#7CFF8A;
+   --bg-deep:#0b0e14;
+  --mesh-1:#1a1c21;
+  --mesh-2:#000000;
+  --mesh-3:#010101;
+  --mesh-5:#090a0a;
+  --mesh-6:#000000;
 
   --glass-fill: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
   --glass-fill-strong: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.06));
@@ -16,7 +16,7 @@ body, html { -webkit-tap-highlight-color: transparent; }
   --glass-border-soft: rgba(255,255,255,0.14);
   --glass-shadow: 0 12px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(255,255,255,0.05);
 
-  --mesh-4:#00C2B5;
+  --mesh-4:#000000;
   --gold:#E3B24E;
   --gold-soft: rgba(227,178,78,0.85);
   --text-hi:#F6F7FB;
