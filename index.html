@@ -3,23 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- 1. Request that compliant search engines do not index this page; this does not hide the domain or restrict access. -->
-<meta name="robots" content="noindex, nofollow">
 <title>ប៊ុន ម៉េងហេង — Student Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Khmer:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="style.css">
 </head>
-<body class="macos-26-light">
+<body class="visionos">
 
 <div class="mesh"><span class="b1"></span><span class="b2"></span><span class="b3"></span><span class="b4"></span><span class="b5"></span><span class="b6"></span></div>
 <div class="grain"></div>
 
 
 
+
 <!-- HERO -->
-<section class="hero">
+<section class="hero" id="top">
   <div class="hero-wrap">
     <div class="hero-content">
       <div class="hero-tag">My Portfolio</div>
@@ -239,33 +240,22 @@
 <script>
 // NAV scroll effect
 const nav = document.getElementById("nav");
-let navScrollFrame = null;
 if (nav) {
-  const updateNavState = () => {
-    nav.classList.toggle("scrolled", window.scrollY > 60);
-    navScrollFrame = null;
-  };
-
   window.addEventListener("scroll", () => {
-    if (!navScrollFrame) {
-      navScrollFrame = requestAnimationFrame(updateNavState);
-    }
-  }, { passive: true });
+    nav.classList.toggle("scrolled", window.scrollY > 60);
+  });
 }
 
 // Scroll reveal
 const io = new IntersectionObserver((entries) => {
-  entries.forEach((e) => {
-    if (e.isIntersecting) {
+  entries.forEach(e => {
+    if(e.isIntersecting){
       e.target.classList.add("in");
       io.unobserve(e.target);
     }
   });
-}, {
-  threshold: 0.12,
-  rootMargin: "0px 0px -8% 0px"
-});
-document.querySelectorAll(".reveal,.reveal-left,.reveal-right").forEach((el) => io.observe(el));
+}, {threshold:0.12, rootMargin:"0px 0px -40px 0px"});
+document.querySelectorAll(".reveal,.reveal-left,.reveal-right").forEach(el => io.observe(el));
 
 // Lightbox
 function openLightbox(el){
@@ -347,7 +337,89 @@ window.addEventListener('load', () => {
   }
 });
 
+// Draggable glass cards — pull like liquid, then spring back into place
+function initDraggableGlass(){
+  const MAX = 46;   // px, rubber-band cap
+  const els = document.querySelectorAll('.stat-box, .subject-item, .tl-content, .goal-card, .cert-card');
 
+  function rubber(delta){
+    const sign = delta < 0 ? -1 : 1;
+    const abs = Math.min(Math.abs(delta), 320);
+    return sign * MAX * (1 - Math.exp(-abs / 80));
+  }
+
+  els.forEach(el => {
+    el.classList.add('drag-glass');
+    let startX = 0, startY = 0, dragging = false, moved = false;
+
+    function pointerMove(e){
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (!moved && Math.hypot(dx, dy) > 6){
+        moved = true;
+        dragging = true;
+        el.classList.remove('snap-back');
+        el.classList.add('is-dragging');
+      }
+      if (dragging){
+        el.style.transform = `translate(${rubber(dx)}px, ${rubber(dy)}px) scale(0.97)`;
+      }
+    }
+
+    function blockClick(e){
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    function pointerUp(){
+      el.removeEventListener('pointermove', pointerMove);
+      el.removeEventListener('pointerup', pointerUp);
+      el.removeEventListener('pointercancel', pointerUp);
+      if (dragging){
+        el.classList.add('snap-back');
+        el.style.transform = '';
+        el.addEventListener('click', blockClick, { capture:true, once:true });
+        el.addEventListener('transitionend', function te(ev){
+          if (ev.propertyName !== 'transform') return;
+          el.classList.remove('is-dragging', 'snap-back');
+          el.removeEventListener('transitionend', te);
+        });
+      }
+      dragging = false;
+    }
+
+    el.addEventListener('pointerdown', (e) => {
+      if (e.button !== undefined && e.button !== 0) return;
+      startX = e.clientX; startY = e.clientY;
+      moved = false; dragging = false;
+      el.addEventListener('pointermove', pointerMove);
+      el.addEventListener('pointerup', pointerUp);
+      el.addEventListener('pointercancel', pointerUp);
+    });
+  });
+}
+initDraggableGlass();
+
+// Liquid Glass tap — lifts and leans toward your finger, light shimmer, springs back on release
+document.querySelectorAll('.glass').forEach(el => {
+  let sx = 0, sy = 0;
+  const release = () => el.classList.remove('pressing');
+  el.addEventListener('pointerdown', e => {
+    const r = el.getBoundingClientRect();
+    const nx = Math.max(-1, Math.min(1, (e.clientX - r.left - r.width / 2) / (r.width / 2)));
+    const ny = Math.max(-1, Math.min(1, (e.clientY - r.top - r.height / 2) / (r.height / 2)));
+    el.style.setProperty('--tx', (e.clientX - r.left) + 'px');
+    el.style.setProperty('--ty', (e.clientY - r.top) + 'px');
+    el.style.setProperty('--dx', (nx * 5) + 'px');
+    el.style.setProperty('--dy', (ny * 4) + 'px');
+    sx = e.clientX; sy = e.clientY;
+    el.classList.add('pressing');
+  });
+  el.addEventListener('pointermove', e => {
+    if (Math.hypot(e.clientX - sx, e.clientY - sy) > 6) release();
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => el.addEventListener(t, release));
+});
 </script>
 </body>
 </html>
